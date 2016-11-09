@@ -1,19 +1,26 @@
 var express = require('express'),
     app = express(),
     http = require('http').Server(app),
-    io = require('socket.io')(http);
+    io = require('socket.io')(http),
+    maxPlayers = 4;
 
 app.get('/', function (req, res) {
     res.sendFile(__dirname + "/public/index.html");
 });
 
-var currentMembers = [{}, {}, {}];
+var currentGamers = [[], [], []];
 
 io.on("connection", function (socket) {
-    currentMembers[0] = socket;
-    currentMembers.forEach(function (member) {
+    var add = true;
+    currentGamers.forEach(function (members, index) {
+        if (members.length < maxPlayers) {
+            add = false;
+            members.push(socket);
+        }
+    });
+    currentGamers.forEach(function (member) {
         console.log(member);
-    })
+    });
     console.log(socket.id + " user has connected");
     socket.nickname = 'Guest';
     socket.on("disconnect", function () {
@@ -40,4 +47,4 @@ app.use(express.static('public'));
 
 http.listen(3000, function () {
     console.log("listening on port 3000");
-})
+});
