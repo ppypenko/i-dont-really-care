@@ -1,53 +1,79 @@
+"use strict";
 var express = require('express'),
     app = express(),
     http = require('http').Server(app),
-    io = require('socket.io')(http),
-    maxPlayers = 4;
+    io = require('socket.io')(http);
 
 app.get('/', function (req, res) {
     res.sendFile(__dirname + "/public/index.html");
 });
-
-var currentGamers = [[], [], []];
+var users = [];
+var rooms = ["room0", "room1", "room2"];
+var maxPlayers = 4;
 
 io.on("connection", function (socket) {
-    var add = true;
-    currentGamers.forEach(function (members, index1) {
-        if (members.length < maxPlayers && add) {
-            members.forEach(function (member, index2) {
-                if (!member && add) {
-                    add = false;
-                    member = socket;
-                    socket.join("room" + index1);
-                }
-            });
-        } else {
-
+    var add = true,
+        room = "";
+    if (users.length === 0) {
+        users.push(socket);
+        room = "room0";
+        add = false;
+    } else {
+        users.forEach(function (user, index) {
+            if (!user) {
+                user = socket;
+                room = "room" + Math.floor(index / maxPlayers);
+                add = false;
+            }
+        });
+        if (add) {
+            users.push(socket);
+            room = "room" + Math.floor(users.length / maxPlayers);
         }
-    });
-    currentGamers.forEach(function (member) {
-        console.log(member);
-    });
+    }
+    socket.join(room);
+    if (rooms.indexOf(room) === -1) {
+        rooms.push(room);
+    }
+    socket.emit('updatechat', 'SERVER', socket.id + " has connected to this room");
+    socket.emit('updaterooms', rooms, room);
+
+
+
     console.log(socket.id + " user has connected");
     socket.nickname = 'Guest';
     socket.on("disconnect", function () {
-        currentGamers.forEach(function (members, index1) {
-            members.forEach(function (member, index2) {
-                if (member.id === socket.id) {
-                    member = false;
-                }
-            });
+        currentGamers.forEach(function (member, index) {
+            if (member.id === socket.id) {
+                member = false;
+                socket.leave("joined room" + Math.floor(index / maxPlayers));
+            }
         });
         console.log(socket.id + " user has disconnected");
     });
 
     socket.on("chat message", function (msg) {
-        console.log(msg.msg);
-        io.emit('chat received', {
+        console.log(msg.msg, socket.id);
+        var room;
+        users.forEach(function (user) {
+            if (user.if === socket.id) {}
+        })
+        currentGamers.forEach(function (member, index) {
+            if (member.id === socket.id) {
+                member = false;
+                room = "room" + Math.floor(index / maxPlayers);
+            }
+        });
+        io.to(room).emit('chat received', {
             message: msg.msg,
             sid: socket.id,
             name: msg.name
         });
+        //        io.emit('chat received', {
+        //            message: msg.msg,
+        //            sid: socket.id,
+        //            name: msg.name
+        //        });
     });
 
     socket.on("get clients", function (msg) {
