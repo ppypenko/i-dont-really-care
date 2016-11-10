@@ -12,10 +12,17 @@ var currentGamers = [[], [], []];
 
 io.on("connection", function (socket) {
     var add = true;
-    currentGamers.forEach(function (members, index) {
-        if (members.length < maxPlayers) {
-            add = false;
-            members.push(socket);
+    currentGamers.forEach(function (members, index1) {
+        if (members.length < maxPlayers && add) {
+            members.forEach(function (member, index2) {
+                if (!member && add) {
+                    add = false;
+                    member = socket;
+                    socket.join("room" + index1);
+                }
+            });
+        } else {
+
         }
     });
     currentGamers.forEach(function (member) {
@@ -24,7 +31,14 @@ io.on("connection", function (socket) {
     console.log(socket.id + " user has connected");
     socket.nickname = 'Guest';
     socket.on("disconnect", function () {
-        console.log(socket.id + "user has disconnected");
+        currentGamers.forEach(function (members, index1) {
+            members.forEach(function (member, index2) {
+                if (member.id === socket.id) {
+                    member = false;
+                }
+            });
+        });
+        console.log(socket.id + " user has disconnected");
     });
 
     socket.on("chat message", function (msg) {
