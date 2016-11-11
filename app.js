@@ -39,6 +39,12 @@ function makeConnection(socket, members, roomname) {
         io.to(roomname).emit('updatechat', socket.username, data);
         //io.sockets.emit('updatechat', socket.username, data);
     });
+    socket.on('updateScore', function (score) {
+        console.log(score);
+        members[socket.username].score += score;
+        io.to(roomname).emit('updateusers', members);
+        //io.sockets.emit('updateusers', members);
+    });
 }
 io.on("connection", function (socket) {
     var room = {};
@@ -54,12 +60,6 @@ io.on("connection", function (socket) {
             rooms.push(room);
             makeConnection(socket, room, "room" + rooms.length);
         }
-        socket.on('updateScore', function (score) {
-            console.log(score);
-            members[socket.username].score += score;
-            io.sockets.emit('updateusers', members);
-        });
-
     } else {
         rooms.push(room);
         makeConnection(socket, room, "room0");
