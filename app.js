@@ -10,11 +10,11 @@ app.get('/', function (req, res) {
 var members = [];
 
 io.on("connection", function (socket) {
-    if (members.length < 3) {
+    if (Object.keys(members).length < 3) {
         socket.on('adduser', function (username) {
             socket.username = username;
             members[username] = username;
-            socket.emit('updatechat', 'SERVER', 'you have connected');
+            socket.emit('updatechat', 'SERVER', 'you "' + username + '" have connected');
             socket.broadcast.emit('updatechat', 'SERVER', username + ' has connected');
             io.sockets.emit('updateusers', members);
         });
