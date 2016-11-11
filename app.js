@@ -8,36 +8,79 @@ app.get('/', function (req, res) {
 });
 
 var members = {};
+var rooms = [];
 var numofconnections = 0;
 var maxconnections = 3;
+
+function makeConnection(socket, members, roomname) {
+    socket.on('adduser', function (username) {
+        socket.username = username;
+        members[username] = username;
+        socket.join(roomname);
+        socket.emit('updatechat', 'SERVER', 'you have connected');
+        socket.broadcast.emit('updatechat', 'SERVER', username + ' has connected');
+        console.log(members, roomname);
+        //io.sockets.emit('updateusers', members);
+        io.to(roomname).emit('updateusers', members);
+    });
+
+    socket.on('disconnect', function () {
+        delete members[socket.username];
+        io.sockets.emit('updateusers', members);
+        socket.leave(roomname);
+        socket.broadcast.emit('updatechat', 'SERVER', socket.username + ' has disconnected');
+    });
+
+    socket.on('sendchat', function (data) {
+        io.to(roomname).emit('updatechat', socket.username, data);
+        //io.sockets.emit('updatechat', socket.username, data);
+    });
+}
 io.on("connection", function (socket) {
-    if (numofconnections < maxconnections) {
-        socket.on('adduser', function (username) {
-            numofconnections += 1;
-            socket.username = username;
-            members[username] = username;
-            socket.emit('updatechat', 'SERVER', 'you have connected');
-            socket.broadcast.emit('updatechat', 'SERVER', username + ' has connected');
-            console.log(members);
-            io.sockets.emit('updateusers', members);
+    var room = {};
+    if (rooms.length > 0) {
+        var add = true;
+        rooms.forEach(function (arrayRoom, index) {
+            if (Object.keys(arrayRoom).length < maxconnections && add) {
+                makeConnection(socket, arrayRoom, "room" + index);
+                add = false;
+            }
         });
-
-        socket.on('disconnect', function () {
-            numofconnections -= 1;
-            delete members[socket.username];
-            io.sockets.emit('updateusers', members);
-            socket.broadcast.emit('updatechat', 'SERVER', socket.username + ' has disconnected');
-        });
-
-        socket.on('sendchat', function (data) {
-            io.sockets.emit('updatechat', socket.username, data);
-        });
-
+        if (add) {
+            rooms.push(room);
+            makeConnection(socket, room, "room" + rooms.length);
+        }
     } else {
-        console.log("too many players");
-        socket.emit('updatechat', 'Server', "We are sorry there are currently to many connections");
-        socket.disconnect();
+        rooms.push(room);
+        makeConnection(socket, room, "room0");
     }
+    //    if (numofconnections < maxconnections) {
+    //        socket.on('adduser', function (username) {
+    //            numofconnections += 1;
+    //            socket.username = username;
+    //            members[username] = username;
+    //            socket.emit('updatechat', 'SERVER', 'you have connected');
+    //            socket.broadcast.emit('updatechat', 'SERVER', username + ' has connected');
+    //            console.log(members);
+    //            io.sockets.emit('updateusers', members);
+    //        });
+    //
+    //        socket.on('disconnect', function () {
+    //            numofconnections -= 1;
+    //            delete members[socket.username];
+    //            io.sockets.emit('updateusers', members);
+    //            socket.broadcast.emit('updatechat', 'SERVER', socket.username + ' has disconnected');
+    //        });
+    //
+    //        socket.on('sendchat', function (data) {
+    //            io.sockets.emit('updatechat', socket.username, data);
+    //        });
+    //
+    //    } else {
+    //        console.log("too many players");
+    //        socket.emit('updatechat', 'Server', "We are sorry there are currently to many connections");
+    //        socket.disconnect();
+    //    }
 });
 
 app.use(express.static('public'));
