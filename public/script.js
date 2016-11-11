@@ -15,6 +15,7 @@ $('document').ready(function () {
     });
 
     socket.on('updateusers', function (data) {
+        console.log(data);
         $('#users').empty();
         $.each(data, function (key, value) {
             $('#users').append('<div>' + key + '</div>');
@@ -65,7 +66,7 @@ function createPlayer() {
 }
 
 function main() {
-    setupCanvas(); //sets up the canvas
-    createPlayer();
+    // setupCanvas(); //sets up the canvas
+    // createPlayer();
 }
 
