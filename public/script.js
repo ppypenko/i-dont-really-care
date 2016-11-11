@@ -2,46 +2,50 @@ var stage;
 var my_name;
 
 $('document').ready(function () {
-    
-    var socket = io();
-    $('#client_info').submit(function (evt) {
-        evt.preventDefault();
-        var temp = '';
-        socket.emit('get clients', temp);
+
+    var socket = io.connect('http://localhost:3000');
+
+    socket.on('connect', function () {
+        socket.emit('adduser', prompt("What's your name?"));
     });
-    
-    socket.on("list clients", function (data) {
+
+
+    socket.on('updatechat', function (username, data) {
+        $('#conversation').append('<b>' + username + ':</b> ' + data + '<br>');
+    });
+
+    socket.on('updateusers', function (data) {
+        $('#users').empty();
+        $.each(data, function (key, value) {
+            $('#users').append('<div>' + key + '</div>');
+        });
+    });
+
+    $(function () {
+        $('#datasend').click(function () {
+            var message = $('#data').val();
+            $('#data').val('');
+            socket.emit('sendchat', message);
+        });
+
+        $('#data').keypress(function (e) {
+            if (e.which == 13) {
+                $(this).blur();
+                $('#datasend').focus().click();
+            }
+        });
+    });
+
+    socket.on("too Many", function (data) {
         console.log(data);
-    });
-    
-    $('#message_form').hide();
-    $('#name_form').submit(function (evt) {
-        evt.preventDefault();
-        my_name = $('#name').val();
-        $('#name').val("");
-        $('#name_holder').html('<h3>' + my_name + '</h3>');
-        $('#message_form').show();
-    });
+        $('#messages').prepend($('<li>').text(data.message));
+    })
 
-    $('#message_form').submit(function (evt) {
-        evt.preventDefault();
-        var temp = {
-            name: my_name,
-            msg: $('#msg').val()
-        }
-        socket.emit('chat message', temp);
-        $('#msg').val("");
-    });
-
-    socket.on("chat received", function (data) {
-        $('#messages').prepend($('<li>').text(data.name + ' says: ' + data.message));
-    });
-    
     main();
 });
 
 var player = {
-    x: ((Math.random()*60) * 10)+100,
+    x: ((Math.random() * 60) * 10) + 100,
     y: 20
 }
 
@@ -56,8 +60,8 @@ function createPlayer() {
     var rectangle = new createjs.Shape();
     rectangle.graphics.beginFill("#447").drawRect(0, 0, 20, 20);
     myText = new createjs.Text(my_name, "12px Arial", "#ffffff");  //creates text object
-    myText.x = 0; 
-    myText.y = 0; 
+    myText.x = 0;
+    myText.y = 0;
 }
 
 function main() {
