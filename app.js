@@ -15,7 +15,10 @@ io.on("connection", function (socket) {
         socket.on('adduser', function (username) {
             numofconnections += 1;
             socket.username = username;
-            members[username] = username;
+            members[username] = {
+                username: username,
+                score: 0
+            };
             socket.emit('updatechat', 'SERVER', 'you have connected');
             socket.broadcast.emit('updatechat', 'SERVER', username + ' has connected');
             console.log(members);
@@ -31,6 +34,12 @@ io.on("connection", function (socket) {
 
         socket.on('sendchat', function (data) {
             io.sockets.emit('updatechat', socket.username, data);
+        });
+
+        socket.on('updateScore', function (score) {
+            console.log(score);
+            members[socket.username].score += score;
+            io.sockets.emit('updateusers', members);
         });
 
     } else {

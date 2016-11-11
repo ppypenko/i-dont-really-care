@@ -1,5 +1,6 @@
 var stage;
 var my_name;
+var current_score = 0;
 
 $('document').ready(function () {
 
@@ -15,10 +16,9 @@ $('document').ready(function () {
     });
 
     socket.on('updateusers', function (data) {
-        console.log(data);
         $('#users').empty();
         $.each(data, function (key, value) {
-            $('#users').append('<div>' + key + '</div>');
+            $('#users').append('<div>' + key + '- Score: ' + value.score + '</div>');
         });
     });
 
@@ -27,6 +27,12 @@ $('document').ready(function () {
             var message = $('#data').val();
             $('#data').val('');
             socket.emit('sendchat', message);
+        });
+
+        $('#scoresend').click(function () {
+            var message = $('#data').val();
+            $('#data').val('');
+            socket.emit('updateScore', 1);
         });
 
         $('#data').keypress(function (e) {
