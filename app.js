@@ -12,10 +12,14 @@ var rooms = [];
 var numofconnections = 0;
 var maxconnections = 3;
 
+
 function makeConnection(socket, members, roomname) {
     socket.on('adduser', function (username) {
         socket.username = username;
-        members[username] = username;
+        members[username] = {
+            username: username,
+            score: 0
+        };
         socket.join(roomname);
         socket.emit('updatechat', 'SERVER', 'you have connected');
         socket.broadcast.emit('updatechat', 'SERVER', username + ' has connected');
@@ -50,6 +54,12 @@ io.on("connection", function (socket) {
             rooms.push(room);
             makeConnection(socket, room, "room" + rooms.length);
         }
+        socket.on('updateScore', function (score) {
+            console.log(score);
+            members[socket.username].score += score;
+            io.sockets.emit('updateusers', members);
+        });
+
     } else {
         rooms.push(room);
         makeConnection(socket, room, "room0");
