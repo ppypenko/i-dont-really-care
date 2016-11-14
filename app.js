@@ -13,6 +13,8 @@ var maxconnections = 3;
 io.on("connection", function (socket) {
     if (numofconnections < maxconnections) {
         socket.on('adduser', function (username) {
+            //!!!check for Duplicate usernames here
+            console.log(members[username]);
             numofconnections += 1;
             socket.username = username;
             members[username] = {
@@ -21,7 +23,6 @@ io.on("connection", function (socket) {
             };
             socket.emit('updatechat', 'SERVER', 'you have connected');
             socket.broadcast.emit('updatechat', 'SERVER', username + ' has connected');
-            console.log(members);
             io.sockets.emit('updateusers', members);
         });
 
@@ -37,14 +38,12 @@ io.on("connection", function (socket) {
         });
 
         socket.on('updateScore', function (score) {
-            console.log(score);
             members[socket.username].score += score;
             io.sockets.emit('updateusers', members);
         });
 
     } else {
-        console.log("too many players");
-        socket.emit('updatechat', 'Server', "We are sorry there are currently to many connections");
+        socket.emit('updatechat', 'Server', "We are sorry this game is full");
         socket.disconnect();
     }
 });

@@ -43,11 +43,6 @@ $('document').ready(function () {
         });
     });
 
-    socket.on("too Many", function (data) {
-        console.log(data);
-        $('#messages').prepend($('<li>').text(data.message));
-    })
-
     main();
 });
 
