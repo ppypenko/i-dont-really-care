@@ -22,6 +22,10 @@ $('document').ready(function () {
         });
     });
 
+    socket.on('nametaken', function (username) {
+        socket.emit('adduser', prompt("The username " + username + " was taken or invalid please enter a different name."));
+    });
+
     $(function () {
         $('#datasend').click(function () {
             var message = $('#data').val();
