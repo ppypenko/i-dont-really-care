@@ -22,13 +22,17 @@ io.on("connection", function (socket) {
                 socket.username = username;
                 members[username] = {
                     username: username,
-                    score: 0
+                    score: 0,
+                    mousex: 0,
+                    mousey: 0,
+                    ballx: 0,
+                    bally: 0,
+                    force: 0
                 };
                 socket.emit('updatechat', 'SERVER', 'you have connected');
                 socket.broadcast.emit('updatechat', 'SERVER', username + ' has connected');
                 io.sockets.emit('updateusers', members);
-            }
-            else {
+            } else {
                 socket.emit('nametaken', username);
             }
         });
@@ -40,6 +44,11 @@ io.on("connection", function (socket) {
                 io.sockets.emit('updateusers', members);
                 socket.broadcast.emit('updatechat', 'SERVER', socket.username + ' has disconnected');
             }
+        });
+        socket.on('update', function (user) {
+            members[socket.username].ballx = user.upX;
+            members[socket.username].bally = user.upY;
+            io.sockets.emit('updateusers', members);
         });
 
         socket.on('sendchat', function (data) {
