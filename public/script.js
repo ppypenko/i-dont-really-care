@@ -97,7 +97,7 @@ function loadFiles() {
 function setupCanvas() {
     var canvas = document.getElementById("game"); //get canvas with id='game'
     canvas.width = 800;
-    canvas.height = 400;
+    canvas.height = 600;
     canvas.style.backgroundColor = "lightblue";
     stage = new createjs.Stage(canvas); //makes stage object from the canvas
 }

@@ -6,13 +6,5 @@ var mouse = {
 };
 
 function mouseInfo(socket) {
-    stage.on("stagemousedown", function (evt) {
-        mouseDownX = Math.floor(evt.stageX);
-        mouseDownY = Math.floor(evt.stageY);
-    });
-    stage.on("stagemouseup", function (evt) {
-        mouseUpX = Math.floor(evt.stageX);
-        mouseUpY = Math.floor(evt.stageY);
-        socket.emit('update', mouse);
-    });
+
 }
