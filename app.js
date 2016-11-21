@@ -60,6 +60,12 @@ io.on("connection", function (socket) {
             io.sockets.emit('updateusers', members);
         });
 
+        socket.on('ballMove', function (ball) {
+            members[socket.username].ballx = ball.ballX;
+            members[socket.username].bally = ball.ballY;
+            io.sockets.emit('updateusers', members);
+        })
+
     } else {
         socket.emit('updatechat', 'Server', "We are sorry this game is full");
         socket.disconnect();

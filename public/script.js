@@ -1,17 +1,113 @@
 "use strict";
-var stage;
-var queue;
+
+var CANVAS_HEIGHT = 600;
+var CANVAS_WIDTH = 800;
+var FPS = 30;
+var titleScreen, backgroundScreen, instructionScreen, gameoverScreen;
+var inBtn, menuBtn, playBtn
+var timertext, scoretext;
+var score;
+var socket;
+var startTime;
+var gamestate;
+var ball;
+var startX;
+var startY;
+var GAMESTATES = {
+    CONSTRUCT: 0,
+    TITLE: 1,
+    INSTRUCTION: 2,
+    STARTGAME: 3,
+    INGAME: 4,
+    GAMEOVER: 5,
+    HOLD: 6
+}
+var stage, loader;
+
 var my_name;
 var user;
 var current_score = 0;
+
 var manifest = [{
     src: "scripts/mouse.js"
 }, {
     src: "scripts/player.js"
 }];
+function handleComplete() {
+    setupCanvas();
+    createSocket();
+    createPlayer();
+    mouseInfo();
+    buildAll();
+    startLoop();
+}
+
+
+(function main() {
+
+    var date = new Date();
+    var cacheVersion = date.getTime();
+    //var cacheVersion = 1;
+
+    var jsEnd = ".js?a=" + cacheVersion;
+
+    manifest = [{
+        src: "scripts/CanvasSetup" + jsEnd
+    }, {
+        src: "scripts/KeyCommands" + jsEnd
+    }, {
+        src: "scripts/BuildAll" + jsEnd
+    }, {
+        src: "scripts/Timer" + jsEnd
+    }, {
+        src: "scripts/Score" + jsEnd
+    }, {
+        src: "scripts/GameLoop" + jsEnd
+    }, {
+        src: "scripts/Show" + jsEnd
+    }, {
+        src: "scripts/Round" + jsEnd
+    }, {
+        src: "images/title.png",
+        id: "title"
+    }, {
+        src: "images/instruction.png",
+        id: "instruction"
+    }, {
+        src: "images/gameover.png",
+        id: "gameover"
+    }, {
+        src: "images/background.png",
+        id: "bg"
+    }, {
+        src: "images/inbutton.png",
+        id: "inBtn"
+    }, {
+        src: "images/menubutton.png",
+        id: "menuBtn"
+    }, {
+        src: "images/playButton.png",
+        id: "playBtn"
+    }, {
+        src: "images/sprites.png",
+        id: "mySprites"
+    },
+    {
+        src: "scripts/mouse.js"
+    }, {
+        src: "scripts/player.js"
+    }];
+
+    loader = new createjs.LoadQueue(true, "assets/");
+    loader.addEventListener("complete", handleComplete);
+    loader.loadManifest(manifest);
+})()
+
+
 
 function createSocket() {
-    var socket = io.connect('http://localhost:3000');
+    var enemiesBalls = {};
+    socket = io.connect('http://localhost:3000');
 
     socket.on('connect', function () {
         socket.emit('adduser', prompt("What's your name?"));
@@ -24,8 +120,17 @@ function createSocket() {
 
     socket.on('updateusers', function (data) {
         $('#users').empty();
+        console.log(data);
         $.each(data, function (key, value) {
-            console.log(key, value);
+            enemiesBalls[key] = value;
+            stage.removeChild(enemiesBalls[key].ball);
+            enemiesBalls[key].ball = new createjs.Shape();
+            enemiesBalls[key].ball.graphics.beginFill("#000").drawCircle(value.ballx, value.bally, 5);
+            enemiesBalls[key].ball.regX = 5;
+            enemiesBalls[key].ball.regY = 5;
+            stage.addChild(enemiesBalls[key].ball);
+            enemiesBalls[key].ball.x = value.ballx;
+            enemiesBalls[key].ball.y = value.bally;
             $('#users').append('<div>' + key + ' - ballx: ' + value.ballx + ' bally: ' + value.bally + '</div>');
         });
     });
@@ -33,6 +138,7 @@ function createSocket() {
     socket.on('nametaken', function (username) {
         socket.emit('adduser', prompt("The username " + username + " was taken or invalid please enter a different name."));
     });
+
     stage.on("stagemousedown", function (evt) {
         var mouseDownX = Math.floor(evt.stageX),
             mouseDownY = Math.floor(evt.stageY);
@@ -66,15 +172,6 @@ function createSocket() {
     });
 }
 
-var player = {
-    x: ((Math.random() * 60) * 10) + 100,
-    y: 20
-};
-
-function setStage(socket) {
-
-}
-
 function createPlayer() {
     var rectangle = new createjs.Shape();
     rectangle.graphics.beginFill("#447").drawRect(0, 0, 20, 20);
@@ -83,27 +180,3 @@ function createPlayer() {
     myText.y = 0;
 }
 
-function loadComplete(evt) {
-    createPlayer();
-    mouseInfo();
-}
-
-function loadFiles() {
-    queue = new createjs.LoadQueue(true, "assets/");
-    queue.on("complete", loadComplete, this);
-    queue.loadManifest(manifest);
-}
-
-function setupCanvas() {
-    var canvas = document.getElementById("game"); //get canvas with id='game'
-    canvas.width = 800;
-    canvas.height = 600;
-    canvas.style.backgroundColor = "lightblue";
-    stage = new createjs.Stage(canvas); //makes stage object from the canvas
-}
-
-(function () {
-    setupCanvas(); //sets up the canvas
-    loadFiles();
-    createSocket();
-})();
