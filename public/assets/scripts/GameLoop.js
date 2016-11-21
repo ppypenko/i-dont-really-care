@@ -13,8 +13,6 @@ function loop() {
             break;
         case GAMESTATES.INGAME:
             updateTimer();
-            score += 1;
-            scoretext.text = "Score: " + score;
             checkMovement();
             break;
         case GAMESTATES.GAMEOVER:
@@ -35,7 +33,6 @@ speedXModifier = 1;
 speedYModifier = 1;
 frictionX = -.1;
 frictionY = -.1;
-prevX, prevY;
 function checkMovement() {
 
     prevX = ball.x;
@@ -77,6 +74,15 @@ function checkMovement() {
 
     ball.x += ballSpeedX;
     ball.y += ballSpeedY;
+
+
+    if (ball.x + 25 >= hole.x && ball.x + 25 <= hole.x + 30 && ball.y + 25 <= hole.y + 30 && ball.y + 25 >= hole.y) {
+        ball.x = 50;
+        ball.y = 50;
+        ballSpeedX = 0;
+        ballSpeedy = 0;
+        updateScore();
+    }
 
     if (prevX !== ball.x || prevY !== ball.y) {
         socket.emit("ballMove", { ballX: ball.x, ballY: ball.y });

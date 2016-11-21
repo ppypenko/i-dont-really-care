@@ -1,5 +1,7 @@
 function buildAll() {
 
+    collisionMethod = ndgmr.checkPixelCollision;
+
     titleScreen = new createjs.Bitmap(loader.getResult("title"));
     instructionScreen = new createjs.Bitmap(loader.getResult("instruction"));
     backgroundScreen = new createjs.Bitmap(loader.getResult("bg"));
@@ -64,10 +66,16 @@ function buildAll() {
     mousetext.x = 50;
     mousetext.y = 100;
 
+    hole = new createjs.Shape();
+    hole.graphics.beginFill("#fff").drawCircle(0, 0, 15);
+    hole.x = CANVAS_WIDTH / 2;
+    hole.y = CANVAS_HEIGHT / 2;
+    hole.radius = 15;
+
     ball = new createjs.Shape();
-    ball.graphics.beginFill("#000").drawCircle(35, 35, 5);
-    ball.regX = 5;
-    ball.regY = 5;
+    ball.graphics.beginFill("#a00").drawCircle(50, 50, 10);
+    ball.regX = 25;
+    ball.regY = 25;
 
     ball.on("mousedown", function (evt) {
         startX = evt.stageX;
@@ -85,7 +93,6 @@ function buildAll() {
         var velocityY = Math.floor(Math.sin((angle) * Math.PI / 180) * 10);
 
         totalDiff = Math.floor(Math.sqrt((xdiff + ydiff)) / 50);
-        console.log(totalDiff);
 
         if (ballSpeedX === 0 && ballSpeedY === 0) {
             ballSpeedX = velocityX;
@@ -105,6 +112,7 @@ function buildAll() {
     stage.addChild(scoretext);
     stage.addChild(mousetext);
     stage.addChild(ball);
+    stage.addChild(hole);
 
 
     hideAll();
@@ -134,4 +142,5 @@ function hideAll() {
     scoretext.visible = false;
     mousetext.visible = false;
     ball.visible = false;
+    hole.visible = false;
 }

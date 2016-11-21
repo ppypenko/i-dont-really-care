@@ -8,9 +8,10 @@ var inBtn, menuBtn, playBtn
 var timertext, scoretext;
 var score;
 var socket;
+var collisionMethod;
 var startTime;
 var gamestate;
-var ball;
+var ball, hole;
 var startX;
 var startY;
 var GAMESTATES = {
@@ -96,6 +97,9 @@ function handleComplete() {
         src: "scripts/mouse.js"
     }, {
         src: "scripts/player.js"
+    },
+    {
+        src: "scripts/Collision/ndgmr.Collision" + jsEnd
     }];
 
     loader = new createjs.LoadQueue(true, "assets/");
@@ -110,7 +114,8 @@ function createSocket() {
     socket = io.connect('http://localhost:3000');
 
     socket.on('connect', function () {
-        socket.emit('adduser', prompt("What's your name?"));
+        my_name = prompt("What's your name?");
+        socket.emit('adduser', my_name);
     });
 
 
@@ -120,18 +125,19 @@ function createSocket() {
 
     socket.on('updateusers', function (data) {
         $('#users').empty();
-        console.log(data);
         $.each(data, function (key, value) {
-            enemiesBalls[key] = value;
-            stage.removeChild(enemiesBalls[key].ball);
-            enemiesBalls[key].ball = new createjs.Shape();
-            enemiesBalls[key].ball.graphics.beginFill("#000").drawCircle(value.ballx, value.bally, 5);
-            enemiesBalls[key].ball.regX = 5;
-            enemiesBalls[key].ball.regY = 5;
-            stage.addChild(enemiesBalls[key].ball);
-            enemiesBalls[key].ball.x = value.ballx;
-            enemiesBalls[key].ball.y = value.bally;
-            $('#users').append('<div>' + key + ' - ballx: ' + value.ballx + ' bally: ' + value.bally + '</div>');
+            if (key != my_name) {
+                if (enemiesBalls[key] === undefined) {
+                    enemiesBalls[key] = new createjs.Shape();
+                    enemiesBalls[key].graphics.beginFill("#000").drawCircle(50, 50, 5);
+                    enemiesBalls[key].regX = 25;
+                    enemiesBalls[key].regY = 25;
+                    stage.addChild(enemiesBalls[key]);
+                }
+                enemiesBalls[key].x = value.ballx;
+                enemiesBalls[key].y = value.bally;
+            }
+            $('#users').append('<div>' + key + ' - Score: ' + value.score + '</div >');
         });
     });
 
@@ -139,16 +145,6 @@ function createSocket() {
         socket.emit('adduser', prompt("The username " + username + " was taken or invalid please enter a different name."));
     });
 
-    stage.on("stagemousedown", function (evt) {
-        var mouseDownX = Math.floor(evt.stageX),
-            mouseDownY = Math.floor(evt.stageY);
-    });
-    stage.on("stagemouseup", function (evt) {
-        var mouse = {};
-        mouse.upX = Math.floor(evt.stageX);
-        mouse.upY = Math.floor(evt.stageY);
-        socket.emit('update', mouse);
-    });
     $(function () {
         $('#datasend').click(function () {
             var message = $('#data').val();

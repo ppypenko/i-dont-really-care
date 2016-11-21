@@ -23,6 +23,7 @@ function startGame() {
     showMouseInfo();
     gamestate = GAMESTATES.INGAME;
     ball.visible = true;
+    hole.visible = true;
 }
 
 function showMouseInfo() {

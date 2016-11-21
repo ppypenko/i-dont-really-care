@@ -13,7 +13,6 @@ var roomnum = 1;
 var numofconnections = 0;
 var maxconnections = 3;
 io.on("connection", function (socket) {
-    console.log(numofconnections);
     if (numofconnections < maxconnections) {
         socket.on('adduser', function (username) {
             if (members[username] === undefined && username != null) {
@@ -45,11 +44,6 @@ io.on("connection", function (socket) {
                 socket.broadcast.emit('updatechat', 'SERVER', socket.username + ' has disconnected');
             }
         });
-        socket.on('update', function (user) {
-            members[socket.username].ballx = user.upX;
-            members[socket.username].bally = user.upY;
-            io.sockets.emit('updateusers', members);
-        });
 
         socket.on('sendchat', function (data) {
             io.sockets.emit('updatechat', socket.username, data);
@@ -63,7 +57,7 @@ io.on("connection", function (socket) {
         socket.on('ballMove', function (ball) {
             members[socket.username].ballx = ball.ballX;
             members[socket.username].bally = ball.ballY;
-            io.sockets.emit('updateusers', members);
+            socket.broadcast.emit('updateusers', members);
         })
 
     } else {
