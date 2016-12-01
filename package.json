@@ -1,0 +1,17 @@
+{
+  "name": "multiplayergame",
+  "version": "1.0.0",
+  "description": "multiplayer minigolf game using socket.io",
+  "main": "app.js",
+  "dependencies": {
+    "express": "^4.14.0",
+    "http": "^0.0.0",
+    "nodemon": "^1.8.1",
+    "socket.io": "^1.7.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ppypenko/i-dont-really-care.git"
+  },
+  "author": "Cody Clawson, Brandon Berning, Pyotr Pypenko"
+}

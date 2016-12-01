@@ -44,7 +44,7 @@ function handleKeyDown(evt) {
             LeftPressed = true;
             break;
         case KEYCODE_SPACE:
-            UpPressed = true;
+            startPower = true;
             break;
         default:
             break;
@@ -82,7 +82,24 @@ function handleKeyUp(evt) {
             LeftPressed = false;
             break;
         case KEYCODE_SPACE:
-            UpPressed = false;
+            var angle = Math.atan2(stage.mouseY - (ball.y + 25), stage.mouseX - (ball.x + 25));
+            angle = (toDegrees(angle) + 180) % 360;
+
+
+            xdiff = Math.floor(Math.pow((stage.mouseX - ball.x), 2));
+            ydiff = Math.floor(Math.pow((stage.mouseY - ball.y), 2));
+
+            totalDiff = Math.floor(Math.sqrt((xdiff + ydiff)) / 50);
+
+            var velocityX = Math.floor(Math.cos((angle) * Math.PI / 180) * (powerNum / 10));
+            var velocityY = Math.floor(Math.sin((angle) * Math.PI / 180) * (powerNum / 10));
+
+
+            if (ballSpeedX === 0 && ballSpeedY === 0) {
+                ballSpeedX = velocityX;
+                ballSpeedY = velocityY;
+            }
+            startPower = false;
             break;
     }
 }

@@ -1,5 +1,4 @@
 function loop() {
-
     //state machine for GameState (instruction, startgame, start level, In game, construct, hold)
     switch (gamestate) {
         case GAMESTATES.CONSTRUCT:
@@ -18,9 +17,19 @@ function loop() {
         case GAMESTATES.GAMEOVER:
             hideAll();
             showGameOver();
+            if (multiplayer) {
+                multiplayer = false;
+                sendScore();
+            }
             gamestate = GAMESTATES.HOLD;
             break;
         case GAMESTATES.HOLD:
+            break;
+        case GAMESTATES.WAITING:
+            showWaiting();
+            break;
+        case GAMESTATES.TOOMANYPLAYERS:
+            showTooMany();
             break;
     }
 
@@ -33,8 +42,36 @@ speedXModifier = 1;
 speedYModifier = 1;
 frictionX = -.1;
 frictionY = -.1;
+powerNum = 0;
+powerMod = 5;
+
 function checkMovement() {
 
+    var collision = collisionMethod(ball, hole);
+
+    var xdiff = Math.floor(Math.pow((stage.mouseX - ball.x), 2));
+    var ydiff = Math.floor(Math.pow((stage.mouseY - ball.y), 2));
+
+    var totalDiff = Math.floor(Math.sqrt((xdiff + ydiff)) / 50);
+
+    if (startPower && ballSpeedX === 0 && ballSpeedY === 0) {
+        powerNum += powerMod;
+
+        if (powerNum > 150) {
+            powerMod = -powerMod;
+        }
+        if (powerNum < 0) {
+            powerMod = -powerMod;
+        }
+
+        if (powerNum % 10 === 0) {
+            powertext.text = "Power: " + powerNum;
+            power.graphics.clear().beginFill("#000").drawRect(50, 520, powerNum, 20);
+        }
+    } else {
+        powerNum = 0;
+        powerMod = 5;
+    }
     prevX = ball.x;
     prevY = ball.y;
     if (ballSpeedX < 0) {
@@ -76,15 +113,7 @@ function checkMovement() {
     ball.y += ballSpeedY;
 
 
-    if (ball.x + 25 >= hole.x && ball.x + 25 <= hole.x + 30 && ball.y + 25 <= hole.y + 30 && ball.y + 25 >= hole.y) {
-        ball.x = 50;
-        ball.y = 50;
-        ballSpeedX = 0;
-        ballSpeedy = 0;
-        updateScore();
-    }
-
-    if (prevX !== ball.x || prevY !== ball.y) {
+    if ((prevX !== ball.x || prevY !== ball.y) && multiplayer) {
         socket.emit("ballMove", { ballX: ball.x, ballY: ball.y });
     }
     if (ballSpeedX > .1 || ballSpeedX < -.1) {
@@ -97,6 +126,14 @@ function checkMovement() {
         ballSpeedY += frictionY;
     } else {
         ballSpeedY = 0;
+    }
+
+    if (collision && Math.pow(ballSpeedX, 2) < 49 && Math.pow(ballSpeedY, 2) < 49) {
+        ball.x = 120;
+        ball.y = 120;
+        ballSpeedX = 0;
+        ballSpeedY = 0;
+        updateScore();
     }
 }
 

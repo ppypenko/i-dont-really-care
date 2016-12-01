@@ -6,5 +6,7 @@ function startScore() {
 function updateScore() {
     score += 1;
     scoretext.text = "Score: " + score;
-    socket.emit('updateScore', 1);
+    if (multiplayer) {
+        socket.emit('updateScore', 1);
+    }
 }
