@@ -1,7 +1,7 @@
-var express = require('express'),
-    app = express(),
-    http = require('http').Server(app),
-    io = require('socket.io')(http);
+var express = require('express');
+var app = require('express')();
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
 
 app.get('/', function (req, res) {
     res.sendFile(__dirname + "/public/index.html");
@@ -91,7 +91,11 @@ app.use(express.static('public'));
 
 var port = Number(process.env.PORT || 3000);
 
-app.listen(process.env.PORT || 3000, function () {
+app.get('/', function (req, res) {
+    res.sendFile(path.join(__dirname + '/public/index.html'));
+})
+
+server.listen(process.env.PORT || 3000, function () {
     console.log("Express server listening on port %d in %s mode", this.address().port, app.settings.env);
 });
 
