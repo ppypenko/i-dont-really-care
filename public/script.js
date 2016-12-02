@@ -133,13 +133,13 @@ function handleComplete() {
     loader.loadManifest(manifest);
 })()
 
-
+var enemiesBalls;
 
 function createSocket() {
     multiplayer = true;
     gamestate = GAMESTATES.WAITING;
 
-    var enemiesBalls = {};
+    enemiesBalls = {};
     socket = io.connect('http://localhost:3000');
 
     socket.on('connect', function () {
@@ -157,7 +157,7 @@ function createSocket() {
         $('#users').empty();
         $.each(data, function (key, value) {
             numofusers += 1;
-            if (key != my_name) {
+            if (key != my_name && gamestate === GAMESTATES.INGAME) {
                 if (enemiesBalls[key] === undefined) {
                     enemiesBalls[key] = new createjs.Shape();
                     enemiesBalls[key].graphics.beginFill("#000").drawCircle(50, 50, 5);
@@ -195,7 +195,6 @@ function createSocket() {
         $.each(members, function (key, value) {
             scoredata += value.username + ": " + value.score + " \n";
         });
-        console.log(scoredata);
         scoretext.text = scoredata;
         disconnectSocket();
     });
@@ -226,6 +225,12 @@ function createSocket() {
 function disconnectSocket() {
     $('#users').empty();
     playerCountText.text = "";
+    $.each(enemiesBalls, function (key, value) {
+        enemiesBalls[key].graphics.clear();
+        stage.removeChild(enemiesBalls[key]);
+    });
+    stage.update();
+    enemiesBalls = {};
     socket.emit("gameover", score);
 }
 

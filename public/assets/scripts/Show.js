@@ -3,7 +3,6 @@ function showTitle() {
     inBtn.visible = true;
     playBtn.visible = true;
     multiBtn.visible = true;
-    console.log("title");
 }
 
 function showInstructions() {
@@ -22,6 +21,8 @@ function showGameOver() {
 function startGame() {
     scoretext.x = 650;
     scoretext.y = 50;
+    ball.x = 120;
+    ball.y = 120;
     scoretext.text = "Score: 0"
     backgroundScreen.visible = true;
     startTimer();
@@ -35,7 +36,6 @@ function startGame() {
 
 function showWaiting() {
     hideAll();
-    console.log("here1");
     waitingScreen.visible = true;
     playerCountText.visible = true;
     cancelBtn.visible = true;

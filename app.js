@@ -55,13 +55,16 @@ io.on("connection", function (socket) {
             members[socket.username].score = data;
 
             if (scores >= Object.keys(members).length) {
-                console.log(Object.keys(members).length);
                 io.sockets.emit('showScores', members);
             }
         })
 
         socket.on("gameover", function () {
             io.sockets.emit('updateusers', members);
+            if (numofconnections > 0) {
+                numofconnections -= 1;
+            }
+            delete members[socket.username];
             socket.disconnect();
         })
 

@@ -55,7 +55,6 @@ function buildAll() {
 
     cancelBtn.on("click", function (evt) {
         hideAll();
-        console.log("here");
         showTitle();
         disconnectSocket();
     })
@@ -103,7 +102,6 @@ function buildAll() {
     power.graphics.beginFill("#000").drawRect(50, 520, 20, 20);
 
     hole = new createjs.Bitmap(loader.getResult("golfHole"));
-    console.log(hole.getBounds().width);
     hole.x = 450;
     hole.y = 460;
 
